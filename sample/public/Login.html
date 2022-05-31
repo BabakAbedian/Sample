@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script>
+        let userInfo = localStorage.getItem('userInfo') || sessionStorage.getItem('userInfo');
+        (function () {
+            if (userInfo) {
+                userInfo = JSON.parse(userInfo);
+            }
+        })();
+    </script>
+
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+
+
+    <title>ToDo App Login/Register</title>
+
+    <link href="https://getbootstrap.com/docs/4.0/examples/sign-in/" rel="canonical">
+
+    <!-- Bootstrap core CSS -->
+    <link href="/libs/bootstrap-4.1.3-dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/styles/login.css" rel="stylesheet">
+</head>
+
+<body class="text-center">
+>
+<div class="row">
+    <div>
+        <script> if (userInfo)
+            document.write(userInfo.username)
+        </script>
+    </div>
+</div>
+<form class="form-signin" id="form" v-on:submit.prevent="loginMode ? login(credentials) : register(credentials);">
+    <img alt="" class="mb-4" height="72" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
+         width="72">
+    <h1 class="h3 mb-3 font-weight-normal">Please sign {{loginMode ? 'in' : 'up'}}</h1>
+    <label class="sr-only" for="inputEmail">Username</label>
+    <input autofocus class="form-control" id="inputEmail" placeholder="Username" required type="text"
+           v-model="credentials.username">
+    <label class="sr-only" for="inputPassword">Password</label>
+    <input class="form-control" id="inputPassword" placeholder="Password" required type="password"
+           v-model="credentials.password">
+    <div class="checkbox mb-3">
+        <label>
+            <input type="checkbox" v-model="credentials.remember" value="remember-me"> Remember me
+        </label>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">{{loginMode ? 'Login' : 'Register'}}</button>
+    <a class="btn text-primary btn-block" v-on:click="toggle">{{loginMode ? 'Register' : 'Login'}}</a>
+    <p class="mt-5 mb-3 text-muted">&copy; 2017-2018</p>
+</form>
+<script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+<script src="/libs/vue/vue.min.js"></script>
+<script>
+    const register = new Vue({
+        el: "#form",
+        data: {
+            loginMode: true,
+            credentials: {
+                username: '',
+                password: '',
+                remember: false,
+            }
+        },
+        methods: {
+            register: function (credentials) {
+                console.log(credentials);
+                let f = this;
+                $.ajax(
+                    {
+                        url: 'auth/register',
+                        method: 'post',
+                        type: 'application/json; charset=utf-8',
+                        data: credentials,
+                    })
+                    .done(function (res) {
+                        f.saveUserInfo(res, credentials.remember);
+                        //location.href = '/';
+                    })
+                    .fail(function (err) {
+                        console.log(err);
+                    })
+            },
+            login: function (credentials) {
+                let f = this;
+                console.log(credentials);
+                $.ajax(
+                    {
+                        url: 'auth/login',
+                        method: 'post',
+                        type: 'application/json; charset=utf-8',
+                        data: credentials,
+                    })
+                    .done(function (res) {
+                        f.saveUserInfo(res, credentials.remember);
+
+
+                    })
+                    .fail(function (err) {
+                        if (err.status === 400) {
+                            alert('Err 400 :' + (JSON.parse(err.responseText)).msg);
+
+                        } else if (err.status === 404) {
+                            alert('Err 404 :' + (JSON.parse(err.responseText)).msg);
+                            f.loginMode = Boolean(false);
+                        }
+                    })
+            },
+            saveUserInfo: function (userInfo, isPermanent) {
+                if (isPermanent)
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                else {
+                    sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    localStorage.clear();
+                }
+            },
+            toggle: function () {
+                this.loginMode = !this.loginMode;
+            }
+        }
+    })
+</script>
+
+</body>
+</html>

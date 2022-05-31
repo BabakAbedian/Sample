@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<!--    <script>-->
+<!--        let userInfo = sessionStorage.getItem('userInfo') || localStorage.getItem('userInfo');-->
+<!--        (function () {-->
+<!--            if (!userInfo) location.href = '/login';-->
+<!--            else {-->
+<!--                userInfo = JSON.parse(userInfo);-->
+<!--            }-->
+<!--        })();-->
+<!--    </script>-->
+    <meta charset="UTF-8">
+    <title>Index page</title>
+    <link href="/libs/bootstrap-4.1.3-dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<header>
+    <div class="container">
+        <h1> This is Node js TODO app</h1>
+        <p>You can manage your TODO list</p>
+        <div class="row">
+            <div class="col">
+
+                <div class="form-group">
+                    <!--                    <form autocomplete="off" v-on="creatTodo()">-->
+                    <form autocomplete="off" onsubmit="creatTodo(); return false;">
+                        <label for="newTodo">Add TODO</label>
+                        <input class="form-control" id="newTodo" placeholder="what you are going to do?" type="text">
+                        <button class="btn btn-success mt-3">Add</button>
+                    </form>
+                </div>
+
+                <table class="table table-striped" id="todos-table">
+                    <tbody>
+                    <tr v-for="todo in todos">
+                        <td>{{todo.text}}</td>
+                        <td width="10"><a class="btn test-success btn-sm" v-on:click="updateTodo(todo)">update</a></td>
+                        <td width="10"><a class="btn text-danger btn-sm" v-on:click="deleteTodo(todo)">delete</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Scripts  -->
+<script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+<script src="/libs/bootstrap-5.0.2-dist/js/bootstrap.min.js"></script>
+<script src="/libs/vue/vue.min.js"></script>
+<script>
+    let model = new Vue({
+        el: '#todos-table',
+        data: {
+            todos: [{
+                todo:
+                    {
+                        id: '',
+                        _id: '',
+                        text: ''
+                    }
+            }]
+        }
+    })
+
+    function creatTodo() {
+        let newTodo = $("#newTodo").val();
+        if (!newTodo) {
+            alert('You should write something Todo');
+            return;
+        }
+        let dat = {text: newTodo};
+
+        $.ajax({
+            url: "/todos",
+            type: 'application/json; charset=utf-8',
+            data: dat,
+            method: 'post',
+        }).done(function (dataT) {
+            model.todos.push(dataT);
+        }).fail(function (err) {
+            alert('text is empty err')
+        });
+    }
+
+    function getTodos() {
+        $.get('/todos', function (data) {
+            model.todos = data;
+
+        // $.ajax({
+        //     beforeSend: function (request) {
+        //         request.setRequestHeader('Authorization', 'Bearer ' + userInfo.token);
+        //     },
+        //     url: "/todos",
+        //     method: 'get',
+        }).done(function (dataT) {
+            model.todos = dataT;
+        }).fail(function (err) {
+            alert('text is empty err')
+        });
+    }
+
+    getTodos();
+
+    function deleteTodo(todo) {
+        console.log(todo);
+        $.ajax({
+            url: "/todos",
+            type: 'application/json; charset=utf-8',
+            data: todo,
+            method: 'delete',
+        }).done(function () {
+            getTodos();
+        }).fail(function (err) {
+            alert('text is empty ' + err)
+        });
+    }
+
+    function updateTodo(todo) {
+
+        let Objs = {
+            "Todos": [
+                todo,
+                {"text": $("#newTodo").val()}
+            ]
+        };
+        $.ajax({
+            url: "/todos",
+            type: 'application/json; charset=utf-8',
+            data: Objs,
+            method: 'put',
+        }).done(function () {
+            getTodos();
+            $("#newTodo").val('');
+        }).fail(function (err) {
+            alert('text is empty' + err)
+        });
+    }
+</script>
+</body>
+
+</html>
