@@ -18,6 +18,8 @@
     "lodash": "^4.17.21",
     "mogobd": "^0.0.1-security",
     "mongodb": "^4.6.0",
+    "sequelize": "^6.20.1",
+    "tedious": "^14.5.0",
     "vue": "^3.2.34"
   }
 }
